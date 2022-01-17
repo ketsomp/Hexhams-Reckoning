@@ -1,11 +1,11 @@
-from os import walk
 import pygame
-import random
-import math
-
+import pickle
+from os import path
 from pygame.constants import K_RIGHT
+from pygame import *
 
 pygame.init()
+mixer.init()
 
 # fps
 clock = pygame.time.Clock()
@@ -20,8 +20,15 @@ textY = 10
 
 # define game variables
 tile_size = 40
-game_over = False
-main_menu=True
+game_over = 0
+main_menu = True
+map = 5
+max_maps = 9
+score = 0
+
+# colors
+white = (255, 255, 255)
+blue = (0, 0, 255)
 
 # True - facing right
 # False - facing left
@@ -33,7 +40,7 @@ IconPath = PrefixPath+'mario.png'
 SpriteRImagePath = PrefixPath+'mario_walking/mario6.png'
 SpriteLImagePath = PrefixPath+'firemario_L.png'
 Enemy1ImagePath = PrefixPath+'goomba.png'
-MusicPath = PrefixPath+'mario_soundtrack.mp3'
+Music1Path = PrefixPath+'mario_soundtrack.mp3'
 ProjectilePath = PrefixPath+'fireball.png'
 ProjectileSoundEffectPath = PrefixPath+'fireball.mp3'
 BackgroundPath = PrefixPath+'grass_background.png'
@@ -43,8 +50,12 @@ GameCompleteSoundEffectPath = PrefixPath+'game_complete_sound_effect.mp3'
 LavaPath = PrefixPath+'lava.png'
 DeadPlayerPath = PrefixPath+'ghost.png'
 RestartButtonPath = PrefixPath+'restart_btn.png'
-StartButtonPath=PrefixPath+'start_btn.png'
-ExitButtonPath=PrefixPath+'exit_btn.png'
+StartButtonPath = PrefixPath+'start_btn.png'
+ExitButtonPath = PrefixPath+'exit_btn.png'
+ExitPath = PrefixPath+'dirt.png'
+CoinPath = PrefixPath+'coin.png'
+CoinSFXPath=PrefixPath+'coin.wav'
+
 
 # screen specifications
 screen_width = 800
@@ -54,16 +65,32 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Hexham's Reckoning")
 pygame.display.set_icon(icon)
 
+# fonts
+font = pygame.font.SysFont('Bauhaus 93', 70)
+font_score = pygame.font.SysFont('Bauhaus 93', 30)
+
+
 # background
 BackgroundPath = PrefixPath+'bg.png'
 backgroundimg = pygame.image.load(BackgroundPath)
 bg = pygame.transform.scale((backgroundimg), (screen_width, screen_height))
 
-#load button images
+# load images
 restart_img = pygame.image.load(RestartButtonPath)
 start_img = pygame.image.load(StartButtonPath)
 exit_img = pygame.image.load(ExitButtonPath)
+projectile_img = pygame.image.load(ProjectilePath)
+coin_img = pygame.image.load(CoinPath)
 
+# load sounds
+ost_music=pygame.mixer.Sound(Music1Path)
+ost_music.play(-1)
+coin_fx=pygame.mixer.Sound(CoinSFXPath)
+coin_fx.set_volume(0.5)
+game_over_fx=pygame.mixer.Sound(GameOverSoundEffectPath)
+game_over_fx.set_volume(0.5)
+game_complete_fx=pygame.mixer.Sound(GameCompleteSoundEffectPath)
+game_complete_fx.set_volume(0.5)
 
 row_count = col_count = 0
 
@@ -76,27 +103,48 @@ def draw_grid():
                          tile_size, 0), (line * tile_size, screen_height))
 
 
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+# reset map
+
+
+def reset_map(map):
+    player.reset(100, screen_height-130)  # coords of player spawn
+    enemy1_group.empty()
+    lava_group.empty()
+    exit_group.empty()
+    # load level data and create new world
+    if path.exists(f'{PrefixPath}'+f'levels/level{map}_data'):
+        pickle_in = open(f'{PrefixPath}'+f'levels/level{map}_data', 'rb')
+        world_data = pickle.load(pickle_in)
+    world = World(world_data)
+
+    return world
+
+
 class Button():
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.clicked=False
+        self.clicked = False
 
     def draw(self):
-        action=False 
+        action = False
         # get cursor position
         pos = pygame.mouse.get_pos()
 
-        #check mouseover and click conditions
+        # check mouseover and click conditions
         if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0]==1 and self.clicked==False:
-                action=True
-                self.clicked=True
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
 
-        if pygame.mouse.get_pressed()[0]==0:
-            self.clicked=False
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
         # draw button
         screen.blit(self.image, self.rect)
         return action
@@ -104,14 +152,14 @@ class Button():
 
 class Player():
     def __init__(self, x, y):
-        self.reset(x,y)
+        self.reset(x, y)
 
     def update(self, game_over):
         #change in x and y
         dx = 0
         dy = 0
         walk_cooldown = 5
-        if not game_over:
+        if game_over == 0:
             # get keystrokes
             key = pygame.key.get_pressed()
             if key[pygame.K_LEFT]:
@@ -155,27 +203,36 @@ class Player():
                     dx = 0
             # check for collision with enemies
             if pygame.sprite.spritecollide(self, enemy1_group, False):
-                game_over = True
+                game_over = -1
+                ost_music.stop()
+                game_over_fx.play()
+            
             # check for collision with lava
             if pygame.sprite.spritecollide(self, lava_group, False):
-                game_over = True
+                game_over = -1
+                ost_music.stop()
+                game_over_fx.play()
+            # check for collision with edge
+            if pygame.sprite.spritecollide(self, exit_group, False):
+                game_over = 1
 
             # update player coords
             self.rect.x += dx
             self.rect.y += dy
 
-        elif game_over:
+        elif game_over == -1:
             self.image = self.dead_image
+            draw_text('Game Over!',font,blue,(screen_width//2)-200,screen_height//2)
             if self.rect.y > 200:
                 self.rect.y -= 5
 
         # draw player on screen
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
+       # pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
         return game_over
 
-    def reset(self,x,y):
+    def reset(self, x, y):
         self.images_right = []
         self.images_left = []
         self.index = 0
@@ -197,6 +254,7 @@ class Player():
         self.width = self.image.get_width()
         self.height = self.image.get_height()
         self.direction = 0
+
 
 class World():
     def __init__(self, data):
@@ -227,21 +285,30 @@ class World():
                 if tile == 2:
                     draw_tile(grass_img)
                 if tile == 3:
-                    draw_tile(tree_img)
-                if tile == 4:
                     enemy1 = Enemy(col_count*tile_size,
                                    row_count*tile_size, Enemy1ImagePath)
                     enemy1_group.add(enemy1)
+                if tile == 4:
+                    draw_tile(tree_img)
                 if tile == 5:
+                    draw_tile(projectile_img)
+                if tile == 6:
                     lava = Lava(col_count*tile_size, row_count*tile_size)
                     lava_group.add(lava)
+                if tile == 7:
+                    coin = Coin(col_count*tile_size+(tile_size//2),
+                                row_count*tile_size+(tile_size//2))
+                    coin_group.add(coin)
+                if tile == 8:
+                    exit = Exit(col_count*tile_size, row_count*tile_size)
+                    exit_group.add(exit)
                 col_count += 1
             row_count += 1
 
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
-            pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+          #  pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -273,72 +340,104 @@ class Lava(pygame.sprite.Sprite):
         self.rect.y = y
 
 
-# world map data
-world_data = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 3, 0, 4, 0, 0, 0, 0, 1],
-    [1, 0, 3, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(ExitPath)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load(CoinPath)
+        self.image = pygame.transform.scale(img, (tile_size//2, tile_size//2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
 
 # instances
 player = Player(100, screen_height-120)
 
 enemy1_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
+coin_group = pygame.sprite.Group()
 
+# coin icon for score
+score_coin = Coin(tile_size//2, tile_size//2)
+coin_group.add(score_coin)
+
+# load in level data and create world
+if path.exists(f'{PrefixPath}'+f'levels/level{map}_data'):
+    pickle_in = open(f'{PrefixPath}'+f'levels/level{map}_data', 'rb')
+    world_data = pickle.load(pickle_in)
 world = World(world_data)
 
 # buttons
 restart_button = Button(screen_width//2-50, screen_height//2+100, restart_img)
-start_button=Button(screen_width//2-350,screen_height//2,start_img)
-exit_button=Button(screen_width//2+150,screen_height//2,exit_img)
+start_button = Button(screen_width//2-350, screen_height//2, start_img)
+exit_button = Button(screen_width//2+150, screen_height//2, exit_img)
 
 # game loop
 running = True
 while running:
     clock.tick(fps)
     screen.blit(bg, (0, 0))
-    
+
     if main_menu:
         if exit_button.draw():
-            running=False
+            running = False
         if start_button.draw():
-            main_menu=False
+            main_menu = False
     else:
         world.draw()
 
-        if not game_over:
+        if game_over == 0:
             enemy1_group.update()
+            # update score
+            # check if coin collected
+            if pygame.sprite.spritecollide(player, coin_group, True):
+                score += 1
+                coin_fx.play()
+            draw_text('X '+str(score), font_score, white, tile_size-10, 10)
 
         enemy1_group.draw(screen)
 
         lava_group.draw(screen)
+        exit_group.draw(screen)
+        coin_group.draw(screen)
 
         game_over = player.update(game_over)
 
         # if player dies
-        if game_over:
-            if restart_button.draw():
-                player.reset(100, screen_height-120)
-                game_over=False
-
+        if game_over == -1:
+            if restart_button.draw():  # if restart button clicked
+                ost_music.play()
+                game_over_fx.stop()
+                world_data = []
+                world = reset_map(map)
+                game_over = 0
+                score = 0
+        # if player exits
+        if game_over == 1:
+            map += 1
+            if map <= max_maps:
+                # reset level
+                world_data = []
+                world = reset_map(map)
+                game_over = 0
+            else:
+                draw_text('You Win!',font,blue,(screen_width//2)-140,screen_height//2)
+                game_complete_fx.play()
+                if restart_button.draw():
+                    map = 1
+                    world_data = []
+                    world = reset_map(map)
+                    game_over = 0
+                    score = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
