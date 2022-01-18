@@ -35,7 +35,7 @@ blue = (0, 0, 255)
 pov = True
 
 # file paths
-PrefixPath = '/Users/Aniket/Documents/Python Files/Hexhams_Reckoning/assets/'
+PrefixPath = path.join(path.dirname(path.abspath(__file__)),'assets\\')
 IconPath = PrefixPath+'mario.png'
 SpriteRImagePath = PrefixPath+'mario_walking/mario6.png'
 SpriteLImagePath = PrefixPath+'firemario_L.png'
