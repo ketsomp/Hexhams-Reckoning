@@ -35,32 +35,37 @@ blue = (0, 0, 255)
 pov = True
 
 # file paths
-PrefixPath = path.join(path.dirname(path.abspath(__file__)),'assets\\')
-IconPath = PrefixPath+'mario.png'
-SpriteRImagePath = PrefixPath+'mario_walking/mario6.png'
-SpriteLImagePath = PrefixPath+'firemario_L.png'
-Enemy1ImagePath = PrefixPath+'goomba.png'
-Music1Path = PrefixPath+'mario_soundtrack.mp3'
-ProjectilePath = PrefixPath+'fireball.png'
-ProjectileSoundEffectPath = PrefixPath+'fireball.mp3'
-BackgroundPath = PrefixPath+'grass_background.png'
-ShootingSoundEffectPath = PrefixPath+'fireball.mp3'
-GameOverSoundEffectPath = PrefixPath+'game_over_sound_effect.mp3'
-GameCompleteSoundEffectPath = PrefixPath+'game_complete_sound_effect.mp3'
-LavaPath = PrefixPath+'lava.png'
-DeadPlayerPath = PrefixPath+'ghost.png'
-RestartButtonPath = PrefixPath+'restart_btn.png'
-StartButtonPath = PrefixPath+'start_btn.png'
-ExitButtonPath = PrefixPath+'exit_btn.png'
-ExitPath = PrefixPath+'dirt.png'
-CoinPath = PrefixPath+'coin.png'
-CoinSFXPath=PrefixPath+'coin.wav'
+Paths = {}
+Paths['Prefix'] = path.join(path.dirname(path.abspath(__file__)), 'assets\\')
+Paths['Icon'] = 'mario.png'
+Paths['SpriteRImage'] = 'mario_walking/mario6.png'
+Paths['SpriteLImage'] = 'firemario_L.png'
+Paths['Enemy1Image'] = 'goomba.png'
+Paths['Music1'] = 'mario_soundtrack.mp3'
+Paths['Projectile'] = 'fireball.png'
+Paths['ProjectileSoundEffect'] = 'fireball.mp3'
+Paths['ShootingSoundEffect'] = 'fireball.mp3'
+Paths['GameOverSoundEffect'] = 'game_over_sound_effect.mp3'
+Paths['GameCompleteSoundEffect'] = 'game_complete_sound_effect.mp3'
+Paths['Lava'] = 'lava.png'
+Paths['DeadPlayer'] = 'ghost.png'
+Paths['RestartButton'] = 'restart_btn.png'
+Paths['StartButton'] = 'start_btn.png'
+Paths['ExitButton'] = 'exit_btn.png'
+Paths['Exit'] = 'dirt.png'
+Paths['Coin'] = 'coin.png'
+Paths['CoinSFX'] = 'coin.wav'
+Paths['Background'] = 'bg.png'
 
+for k, v in Paths.items():
+    if k != 'Prefix':
+        Paths[k] = Paths['Prefix'] + Paths[k]
 
+# Replacing
 # screen specifications
 screen_width = 800
 screen_height = 800
-icon = pygame.image.load(IconPath)
+icon = pygame.image.load(Paths['Icon'])
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Hexham's Reckoning")
 pygame.display.set_icon(icon)
@@ -71,25 +76,24 @@ font_score = pygame.font.SysFont('Bauhaus 93', 30)
 
 
 # background
-BackgroundPath = PrefixPath+'bg.png'
-backgroundimg = pygame.image.load(BackgroundPath)
+backgroundimg = pygame.image.load(Paths['Background'])
 bg = pygame.transform.scale((backgroundimg), (screen_width, screen_height))
 
 # load images
-restart_img = pygame.image.load(RestartButtonPath)
-start_img = pygame.image.load(StartButtonPath)
-exit_img = pygame.image.load(ExitButtonPath)
-projectile_img = pygame.image.load(ProjectilePath)
-coin_img = pygame.image.load(CoinPath)
+restart_img = pygame.image.load(Paths['RestartButton'])
+start_img = pygame.image.load(Paths['StartButton'])
+exit_img = pygame.image.load(Paths['ExitButton'])
+projectile_img = pygame.image.load(Paths['Projectile'])
+coin_img = pygame.image.load(Paths['Coin'])
 
 # load sounds
-ost_music=pygame.mixer.Sound(Music1Path)
+ost_music = pygame.mixer.Sound(Paths['Music1'])
 ost_music.play(-1)
-coin_fx=pygame.mixer.Sound(CoinSFXPath)
+coin_fx = pygame.mixer.Sound(Paths['CoinSFX'])
 coin_fx.set_volume(0.5)
-game_over_fx=pygame.mixer.Sound(GameOverSoundEffectPath)
+game_over_fx = pygame.mixer.Sound(Paths['GameOverSoundEffect'])
 game_over_fx.set_volume(0.5)
-game_complete_fx=pygame.mixer.Sound(GameCompleteSoundEffectPath)
+game_complete_fx = pygame.mixer.Sound(Paths['GameCompleteSoundEffect'])
 game_complete_fx.set_volume(0.5)
 
 row_count = col_count = 0
@@ -116,8 +120,8 @@ def reset_map(map):
     lava_group.empty()
     exit_group.empty()
     # load level data and create new world
-    if path.exists(f'{PrefixPath}'+f'levels/level{map}_data'):
-        pickle_in = open(f'{PrefixPath}'+f'levels/level{map}_data', 'rb')
+    if path.exists(f'{Paths["Prefix"]}'+f'levels/level{map}_data'):
+        pickle_in = open(f'{Paths["Prefix"]}'+f'levels/level{map}_data', 'rb')
         world_data = pickle.load(pickle_in)
     world = World(world_data)
 
@@ -206,7 +210,7 @@ class Player():
                 game_over = -1
                 ost_music.stop()
                 game_over_fx.play()
-            
+
             # check for collision with lava
             if pygame.sprite.spritecollide(self, lava_group, False):
                 game_over = -1
@@ -222,7 +226,8 @@ class Player():
 
         elif game_over == -1:
             self.image = self.dead_image
-            draw_text('Game Over!',font,blue,(screen_width//2)-200,screen_height//2)
+            draw_text('Game Over!', font, blue,
+                      (screen_width//2)-200, screen_height//2)
             if self.rect.y > 200:
                 self.rect.y -= 5
 
@@ -240,13 +245,13 @@ class Player():
         for n in range(1, 9):
             # mass load images for walking animation
             img_right = pygame.image.load(
-                f"{PrefixPath}mario_walking/Rmario{n}.png")
+                f"{Paths['Prefix']}mario_walking/Rmario{n}.png")
             img_right = pygame.transform.scale(img_right, (40, 80))
             # flip on x axis for moving left
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
-        self.dead_image = pygame.image.load(DeadPlayerPath)
+        self.dead_image = pygame.image.load(Paths['DeadPlayer'])
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -262,11 +267,11 @@ class World():
 
         # load images
         dirt_img = pygame.image.load(
-            PrefixPath+'dirt.png')
+            Paths['Prefix']+'dirt.png')
         grass_img = pygame.image.load(
-            PrefixPath+'grass.png')
+            Paths['Prefix']+'grass.png')
         tree_img = pygame.image.load(
-            PrefixPath+'tree.png')
+            Paths['Prefix']+'tree.png')
 
         def draw_tile(image):
             img = pygame.transform.scale(image, (tile_size, tile_size))
@@ -286,7 +291,7 @@ class World():
                     draw_tile(grass_img)
                 if tile == 3:
                     enemy1 = Enemy(col_count*tile_size,
-                                   row_count*tile_size, Enemy1ImagePath)
+                                   row_count*tile_size, Paths['Enemy1Image'])
                     enemy1_group.add(enemy1)
                 if tile == 4:
                     draw_tile(tree_img)
@@ -334,7 +339,7 @@ class Enemy(pygame.sprite.Sprite):
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(LavaPath)
+        self.image = pygame.image.load(Paths['Lava'])
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -343,7 +348,7 @@ class Lava(pygame.sprite.Sprite):
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(ExitPath)
+        self.image = pygame.image.load(Paths['Exit'])
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -352,7 +357,7 @@ class Exit(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load(CoinPath)
+        img = pygame.image.load(Paths['Coin'])
         self.image = pygame.transform.scale(img, (tile_size//2, tile_size//2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -371,8 +376,8 @@ score_coin = Coin(tile_size//2, tile_size//2)
 coin_group.add(score_coin)
 
 # load in level data and create world
-if path.exists(f'{PrefixPath}'+f'levels/level{map}_data'):
-    pickle_in = open(f'{PrefixPath}'+f'levels/level{map}_data', 'rb')
+if path.exists(f'{Paths["Prefix"]}'+f'levels/level{map}_data'):
+    pickle_in = open(f'{Paths["Prefix"]}'+f'levels/level{map}_data', 'rb')
     world_data = pickle.load(pickle_in)
 world = World(world_data)
 
@@ -430,7 +435,8 @@ while running:
                 world = reset_map(map)
                 game_over = 0
             else:
-                draw_text('You Win!',font,blue,(screen_width//2)-140,screen_height//2)
+                draw_text('You Win!', font, blue,
+                          (screen_width//2)-140, screen_height//2)
                 game_complete_fx.play()
                 if restart_button.draw():
                     map = 1
