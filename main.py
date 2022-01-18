@@ -1,8 +1,9 @@
-import pygame
 import pickle
 from os import path
-from pygame.constants import K_RIGHT
+
+import pygame
 from pygame import *
+from pygame.constants import K_RIGHT
 
 pygame.init()
 mixer.init()
