@@ -1,7 +1,7 @@
 from os import path
 
 Paths = {}
-Paths['Prefix'] = path.join(path.dirname(path.abspath(__file__)), 'assets\\')
+Paths['Prefix'] = path.join(path.dirname(path.abspath(__file__)), 'assets')
 Paths['Icon'] = 'mario.png'
 Paths['SpriteRImage'] = 'mario_walking/mario6.png'
 Paths['SpriteLImage'] = 'firemario_L.png'
@@ -24,4 +24,4 @@ Paths['Background'] = 'bg.png'
 
 for k, v in Paths.items():
     if k != 'Prefix':
-        Paths[k] = Paths['Prefix'] + Paths[k]
+        Paths[k] = path.join(Paths['Prefix'], v)
