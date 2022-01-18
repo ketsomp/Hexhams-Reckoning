@@ -3,7 +3,7 @@ from os import path
 Paths = {}
 Paths['Prefix'] = path.join(path.dirname(path.abspath(__file__)), 'assets')
 Paths['Icon'] = 'mario.png'
-Paths['SpriteRImage'] = 'mario_walking/mario6.png'
+Paths['SpriteRImage'] = path.join('mario_walking','mario6.png')
 Paths['SpriteLImage'] = 'firemario_L.png'
 Paths['Enemy1Image'] = 'goomba.png'
 Paths['Music1'] = 'mario_soundtrack.mp3'

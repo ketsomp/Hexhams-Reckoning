@@ -96,8 +96,9 @@ def reset_map(map):
     lava_group.empty()
     exit_group.empty()
     # load level data and create new world
-    if path.exists(f'{Paths["Prefix"]}'+f'levels/level{map}_data'):
-        pickle_in = open(f'{Paths["Prefix"]}'+f'levels/level{map}_data', 'rb')
+    p = path.join(Paths["Prefix"], 'levels', f'level{map}_data')
+    if path.exists(p):
+        pickle_in = open(p, 'rb')
         world_data = pickle.load(pickle_in)
     world = World(world_data)
 
@@ -220,8 +221,8 @@ class Player():
         self.count = 0
         for n in range(1, 9):
             # mass load images for walking animation
-            img_right = pygame.image.load(
-                f"{Paths['Prefix']}mario_walking/Rmario{n}.png")
+            img_right = pygame.image.load(path.join(
+                Paths['Prefix'],"mario_walking",f"Rmario{n}.png"))
             img_right = pygame.transform.scale(img_right, (40, 80))
             # flip on x axis for moving left
             img_left = pygame.transform.flip(img_right, True, False)
@@ -243,11 +244,11 @@ class World():
 
         # load images
         dirt_img = pygame.image.load(
-            Paths['Prefix']+'dirt.png')
+            path.join(Paths['Prefix'],'dirt.png'))
         grass_img = pygame.image.load(
-            Paths['Prefix']+'grass.png')
+            path.join(Paths['Prefix'],'grass.png'))
         tree_img = pygame.image.load(
-            Paths['Prefix']+'tree.png')
+            path.join(Paths['Prefix'],'tree.png'))
 
         def draw_tile(image):
             img = pygame.transform.scale(image, (tile_size, tile_size))
@@ -352,8 +353,9 @@ score_coin = Coin(tile_size//2, tile_size//2)
 coin_group.add(score_coin)
 
 # load in level data and create world
-if path.exists(f'{Paths["Prefix"]}'+f'levels/level{map}_data'):
-    pickle_in = open(f'{Paths["Prefix"]}'+f'levels/level{map}_data', 'rb')
+p = path.join(Paths["Prefix"],'levels',f'level{map}_data')
+if path.exists(p):
+    pickle_in = open(p, 'rb')
     world_data = pickle.load(pickle_in)
 world = World(world_data)
 
