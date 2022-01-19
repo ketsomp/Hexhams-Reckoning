@@ -33,7 +33,7 @@ pygame.display.set_caption('Level Editor')
 # exit_img = pygame.image.load(PrefixPath+'exit_btn.png')
 # save_img = pygame.image.load(PrefixPath+'save_btn.png')
 # load_img = pygame.image.load(PrefixPath+'load_btn.png')
-
+picklepath = lambda level : path.join(path.dirname(path.abspath(__file__)),f'level{level}_data')
 bg_img = pygame.image.load(Paths['Background'])
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
 dirt_img = pygame.image.load(Paths['Exit'])
@@ -167,13 +167,13 @@ while run:
 	#load and save level
 	if save_button.draw():
 		#save level data
-		pickle_out = open(f'level{level}_data', 'wb')
+		pickle_out = open(picklepath(level), 'wb')
 		pickle.dump(world_data, pickle_out)
 		pickle_out.close()
 	if load_button.draw():
 		#load in level data
-		if path.exists(f'level{level}_data'):
-			pickle_in = open(f'level{level}_data', 'rb')
+		if path.exists(picklepath(level)):
+			pickle_in = open(picklepath(level), 'rb')
 			world_data = pickle.load(pickle_in)
 
 
