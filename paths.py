@@ -16,11 +16,15 @@ Paths['Lava'] = 'lava.png'
 Paths['DeadPlayer'] = 'ghost.png'
 Paths['RestartButton'] = 'restart_btn.png'
 Paths['StartButton'] = 'start_btn.png'
+Paths['SaveButton'] = 'save_btn.png'
+Paths['LoadButton'] = 'load_btn.png'
 Paths['ExitButton'] = 'exit_btn.png'
 Paths['Exit'] = 'dirt.png'
 Paths['Coin'] = 'coin.png'
 Paths['CoinSFX'] = 'coin.wav'
 Paths['Background'] = 'bg.png'
+Paths['Grass'] = 'grass.png'
+Paths['Tree'] = 'tree.png'
 
 for k, v in Paths.items():
     if k != 'Prefix':

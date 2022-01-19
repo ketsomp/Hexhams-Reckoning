@@ -1,7 +1,7 @@
 import pygame
 import pickle
 from os import path
-
+from paths import Paths
 
 pygame.init()
 
@@ -20,20 +20,32 @@ pygame.display.set_caption('Level Editor')
 
 
 #load images
-PrefixPath = '/Users/Aniket/Documents/Python Files/Hexhams_Reckoning/assets/'
-bg_img = pygame.image.load(PrefixPath+'bg.png')
-bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
-dirt_img = pygame.image.load(PrefixPath+'dirt.png')
-grass_img = pygame.image.load(PrefixPath+'grass.png')
-blob_img = pygame.image.load(PrefixPath+'goomba.png')
-platform_x_img = pygame.image.load(PrefixPath+'tree.png')
-platform_y_img = pygame.image.load(PrefixPath+'fireball.png')
-lava_img = pygame.image.load(PrefixPath+'lava.png')
-coin_img = pygame.image.load(PrefixPath+'coin.png')
-exit_img = pygame.image.load(PrefixPath+'exit_btn.png')
-save_img = pygame.image.load(PrefixPath+'save_btn.png')
-load_img = pygame.image.load(PrefixPath+'load_btn.png')
+# PrefixPath = '/Users/Aniket/Documents/Python Files/Hexhams_Reckoning/assets/'
+# bg_img = pygame.image.load(PrefixPath+'bg.png')
+# bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
+# dirt_img = pygame.image.load(PrefixPath+'dirt.png')
+# grass_img = pygame.image.load(PrefixPath+'grass.png')
+# blob_img = pygame.image.load(PrefixPath+'goomba.png')
+# platform_x_img = pygame.image.load(PrefixPath+'tree.png')
+# platform_y_img = pygame.image.load(PrefixPath+'fireball.png')
+# lava_img = pygame.image.load(PrefixPath+'lava.png')
+# coin_img = pygame.image.load(PrefixPath+'coin.png')
+# exit_img = pygame.image.load(PrefixPath+'exit_btn.png')
+# save_img = pygame.image.load(PrefixPath+'save_btn.png')
+# load_img = pygame.image.load(PrefixPath+'load_btn.png')
 
+bg_img = pygame.image.load(Paths['Background'])
+bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
+dirt_img = pygame.image.load(Paths['Exit'])
+grass_img = pygame.image.load(Paths['Grass'])
+blob_img = pygame.image.load(Paths['Enemy1'])
+platform_x_img = pygame.image.load(Paths['Tree'])
+platform_y_img = pygame.image.load(Paths['Projectile'])
+lava_img = pygame.image.load(Paths['Lava'])
+coin_img = pygame.image.load(Paths['Coin'])
+exit_img = pygame.image.load(Paths['ExitButton'])
+save_img = pygame.image.load(Paths['SaveButton'])
+load_img = pygame.image.load(Paths['LoadButton'])
 
 #define game variables
 clicked = False
