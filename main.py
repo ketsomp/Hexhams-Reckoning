@@ -1,12 +1,13 @@
 import pickle
 from os import path
-
+import math
+from re import X
 import pygame
-from pygame import *
+from pygame import mixer
 from pygame.constants import K_RIGHT
 
 pygame.init()
-mixer.init()
+mixer.init()        
 
 # fps
 clock = pygame.time.Clock()
@@ -49,6 +50,7 @@ pygame.display.set_icon(icon)
 # fonts
 font = pygame.font.SysFont('Bauhaus 93', 70)
 font_score = pygame.font.SysFont('Bauhaus 93', 30)
+font_title=pygame.font.SysFont('Herculanum',70)
 
 
 # background
@@ -87,8 +89,14 @@ def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
 
-# reset map
+def isClose(x1, y1, x2, y2):
+    distance = math.sqrt((math.pow(x1-x2, 2)) + (math.pow(y1-y2, 2)))
+    if distance < 300:
+        return True
+    else:
+        return False
 
+# reset map
 
 def reset_map(map):
     player.reset(100, screen_height-130)  # coords of player spawn
@@ -150,7 +158,7 @@ class Player():
             if key[pygame.K_RIGHT]:
                 dx += 5
                 self.count += 1
-                self.direction = 1
+                self.direction = 1  
             if key[pygame.K_UP]:
                 dy -= 5
             if key[pygame.K_DOWN]:
@@ -250,6 +258,18 @@ class World():
         tree_img = pygame.image.load(
             path.join(Paths['Prefix'],'tree.png'))
 
+        one_img=pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/one.webp')
+        two_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/two.webp')
+        three_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/three.png')
+        four_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/four.png')
+        five_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/five.webp')
+        six_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/six.png')
+        seven_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/seven.png')
+        eight_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/eight.webp')
+        nine_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/nine.webp')
+
+
+
         def draw_tile(image):
             img = pygame.transform.scale(image, (tile_size, tile_size))
             img_rect = img.get_rect()
@@ -284,6 +304,25 @@ class World():
                 if tile == 8:
                     exit = Exit(col_count*tile_size, row_count*tile_size)
                     exit_group.add(exit)
+                if tile==9:
+                    draw_tile(one_img)
+                if tile==10:
+                    draw_tile(two_img)
+                if tile==11:
+                    draw_tile(three_img)
+                if tile==12:
+                    draw_tile(four_img)
+                if tile==13:
+                    draw_tile(five_img)
+                if tile==14:
+                    draw_tile(six_img)
+                if tile==15:
+                    draw_tile(seven_img)
+                if tile==16:
+                    draw_tile(eight_img)
+                if tile==17:
+                    draw_tile(nine_img)
+                
                 col_count += 1
             row_count += 1
 
@@ -291,6 +330,8 @@ class World():
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
           #  pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+
+enemy_speed=1
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -303,16 +344,36 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
         self.move_direction = 1
         self.move_counter = 0
+        self.edx=self.edy=0
 
     def update(self):
-        # enemies moving
-        self.rect.x += self.move_direction
-        self.move_counter += 1
-        if self.move_counter > 50:
-            self.move_direction *= -1
-            self.move_counter *= -1
-
-
+        # enemies movement
+        self.rect.x+=self.edx
+        self.rect.y+=self.edy
+        if isClose(player.rect.x,player.rect.y,self.rect.x,self.rect.y):
+            #target player if player gets too close
+            if self.rect.x<player.rect.x:
+                self.edx=enemy_speed
+            else:
+                self.edx=-enemy_speed
+            if self.rect.y<player.rect.y:
+                self.edy=enemy_speed
+            else:
+                self.edy=-enemy_speed
+        else:
+            #continue to passively move
+            self.edx=self.edy=0
+            self.rect.x += self.move_direction
+            self.move_counter += 1
+            if self.move_counter > 50:
+                self.move_direction *= -1
+                self.move_counter *= -1
+        #keep enemies from crossing out of bounds
+        if self.rect.x>=screen_width-50:
+            self.edx=-self.edx
+        if self.rect.y>=screen_width-50:
+            self.edy=-self.edy
+        
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -371,6 +432,9 @@ while running:
     screen.blit(bg, (0, 0))
 
     if main_menu:
+        draw_text("Hexham's Reckoning",font_title,white,50,200)
+        draw_text('Objective: Collect 90 coins',font_score,white,275,600)
+        draw_text('Avoid enemies',font_score,white,275,650)
         if exit_button.draw():
             running = False
         if start_button.draw():
@@ -380,6 +444,8 @@ while running:
 
         if game_over == 0:
             enemy1_group.update()
+            draw_text(f'Map: {map}', font_score, white, screen_width-75, 10)
+
             # update score
             # check if coin collected
             if pygame.sprite.spritecollide(player, coin_group, True):
@@ -388,7 +454,6 @@ while running:
             draw_text('X '+str(score), font_score, white, tile_size-10, 10)
 
         enemy1_group.draw(screen)
-
         lava_group.draw(screen)
         exit_group.draw(screen)
         coin_group.draw(screen)
@@ -408,14 +473,17 @@ while running:
         if game_over == 1:
             map += 1
             if map <= max_maps:
-                # reset level
+                # reset level for next map
                 world_data = []
                 world = reset_map(map)
                 game_over = 0
             else:
+                #end game
                 draw_text('You Win!', font, blue,
                           (screen_width//2)-140, screen_height//2)
+                ost_music.stop()
                 game_complete_fx.play()
+
                 if restart_button.draw():
                     map = 1
                     world_data = []
