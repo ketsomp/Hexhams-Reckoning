@@ -63,7 +63,8 @@ start_img = pygame.image.load(Paths['StartButton'])
 exit_img = pygame.image.load(Paths['ExitButton'])
 projectile_img = pygame.image.load(Paths['Projectile'])
 coin_img = pygame.image.load(Paths['Coin'])
-
+mute_img = pygame.image.load(Paths['MuteButton'])
+mute_img = pygame.transform.scale(mute_img, (100, 100))
 # load sounds
 ost_music = pygame.mixer.Sound(Paths['Music1'])
 ost_music.play(-1)
@@ -258,16 +259,15 @@ class World():
         tree_img = pygame.image.load(
             path.join(Paths['Prefix'],'tree.png'))
 
-        one_img=pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/one.webp')
-        two_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/two.webp')
-        three_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/three.png')
-        four_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/four.png')
-        five_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/five.webp')
-        six_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/six.png')
-        seven_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/seven.png')
-        eight_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/eight.webp')
-        nine_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/nine.webp')
-
+        one_img=pygame.image.load(path.join(Paths['Prefix'],'numbers','one.webp'))
+        two_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','two.webp'))
+        three_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','three.png'))
+        four_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','four.png'))
+        five_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','five.webp'))
+        six_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','six.png'))
+        seven_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','seven.png'))
+        eight_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','eight.webp'))
+        nine_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','nine.webp'))
 
 
         def draw_tile(image):
@@ -424,13 +424,21 @@ world = World(world_data)
 restart_button = Button(screen_width//2-50, screen_height//2+100, restart_img)
 start_button = Button(screen_width//2-350, screen_height//2, start_img)
 exit_button = Button(screen_width//2+150, screen_height//2, exit_img)
-
+mute_button = Button(screen_width-100, screen_height-100, mute_img)
+is_muted = False
 # game loop
 running = True
 while running:
     clock.tick(fps)
     screen.blit(bg, (0, 0))
-
+    if mute_button.draw():
+        is_muted = not is_muted
+        mute_button.image = pygame.transform.flip(mute_button.image, True, False)
+        if is_muted:
+            ost_music.stop()
+        else:
+            ost_music.play(-1)
+    
     if main_menu:
         draw_text("Hexham's Reckoning",font_title,white,50,200)
         draw_text('Objective: Collect 90 coins',font_score,white,275,600)
