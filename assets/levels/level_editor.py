@@ -12,7 +12,6 @@ fps = 60
 tile_size = 30
 cols = 20
 margin = 100
-tile_limit=17
 screen_width = tile_size * cols
 screen_height = (tile_size * cols) + margin
 
@@ -34,7 +33,7 @@ pygame.display.set_caption('Level Editor')
 # exit_img = pygame.image.load(PrefixPath+'exit_btn.png')
 # save_img = pygame.image.load(PrefixPath+'save_btn.png')
 # load_img = pygame.image.load(PrefixPath+'load_btn.png')
-
+picklepath = lambda level : path.join(path.dirname(path.abspath(__file__)),f'level{level}_data')
 bg_img = pygame.image.load(Paths['Background'])
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height - margin))
 dirt_img = pygame.image.load(Paths['Exit'])
@@ -47,15 +46,6 @@ coin_img = pygame.image.load(Paths['Coin'])
 exit_img = pygame.image.load(Paths['ExitButton'])
 save_img = pygame.image.load(Paths['SaveButton'])
 load_img = pygame.image.load(Paths['LoadButton'])
-one_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/one.webp')
-two_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/two.webp')
-three_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/three.png')
-four_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/four.png')
-five_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/five.webp')
-six_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/six.png')
-seven_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/seven.png')
-eight_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/eight.webp')
-nine_img= pygame.image.load('/Users/Aniket/Documents/Python Files/Hexhams-Reckoning/assets/numbers/nine.webp')
 
 #define game variables
 clicked = False
@@ -118,7 +108,7 @@ def draw_world():
 					img = pygame.transform.scale(platform_y_img, (tile_size, tile_size // 2))
 					screen.blit(img, (col * tile_size, row * tile_size))
 				if world_data[row][col] == 6:
-					#lavao
+					#lava
 					img = pygame.transform.scale(lava_img, (tile_size, tile_size // 2))
 					screen.blit(img, (col * tile_size, row * tile_size + (tile_size // 2)))
 				if world_data[row][col] == 7:
@@ -126,48 +116,9 @@ def draw_world():
 					img = pygame.transform.scale(coin_img, (tile_size // 2, tile_size // 2))
 					screen.blit(img, (col * tile_size + (tile_size // 4), row * tile_size + (tile_size // 4)))
 				if world_data[row][col] == 8:
-					# exit
+					#exit
 					img = pygame.transform.scale(exit_img, (tile_size, int(tile_size * 1.5)))
 					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 9:
-					#one exit
-					img = pygame.transform.scale(one_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 10:
-					#two exit
-					img = pygame.transform.scale(two_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 11:
-					#three exit
-					img = pygame.transform.scale(three_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 12:
-					#four exit
-					img = pygame.transform.scale(four_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 13:
-					#five exit
-					img = pygame.transform.scale(five_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 14:
-					#six exit
-					img = pygame.transform.scale(six_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 15:
-					#seven exit
-					img = pygame.transform.scale(seven_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 16:
-					#eight exit
-					img = pygame.transform.scale(eight_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 17:
-					#nine exit
-					img = pygame.transform.scale(nine_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				
-				
-				
 
 
 
@@ -216,13 +167,13 @@ while run:
 	#load and save level
 	if save_button.draw():
 		#save level data
-		pickle_out = open(Paths["Prefix"]+ '/levels/'+ f'level{level}_data', 'wb')
+		pickle_out = open(picklepath(level), 'wb')
 		pickle.dump(world_data, pickle_out)
 		pickle_out.close()
 	if load_button.draw():
 		#load in level data
-		if path.exists(f'level{level}_data'):
-			pickle_in = open(Paths["Prefix"]+ '/levels/'+ f'level{level}_data', 'rb')
+		if path.exists(picklepath(level)):
+			pickle_in = open(picklepath(level), 'rb')
 			world_data = pickle.load(pickle_in)
 
 
@@ -251,12 +202,12 @@ while run:
 				#update tile value
 				if pygame.mouse.get_pressed()[0] == 1:
 					world_data[y][x] += 1
-					if world_data[y][x] > tile_limit:
+					if world_data[y][x] > 8:
 						world_data[y][x] = 0
 				elif pygame.mouse.get_pressed()[2] == 1:
 					world_data[y][x] -= 1
 					if world_data[y][x] < 0:
-						world_data[y][x] = tile_limit
+						world_data[y][x] = 8
 		if event.type == pygame.MOUSEBUTTONUP:
 			clicked = False
 		#up and down key presses to change level number
