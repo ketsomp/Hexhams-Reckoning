@@ -195,13 +195,15 @@ class Player():
             if pygame.sprite.spritecollide(self, enemy1_group, False):
                 game_over = -1
                 ost_music.stop()
-                game_over_fx.play()
+                if not is_muted:
+                    game_over_fx.play()
 
             # check for collision with lava
             if pygame.sprite.spritecollide(self, lava_group, False):
                 game_over = -1
                 ost_music.stop()
-                game_over_fx.play()
+                if not is_muted:
+                    game_over_fx.play()
             # check for collision with edge
             if pygame.sprite.spritecollide(self, exit_group, False):
                 game_over = 1
