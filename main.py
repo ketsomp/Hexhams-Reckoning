@@ -471,7 +471,8 @@ while running:
         # if player dies
         if game_over == -1:
             if restart_button.draw():  # if restart button clicked
-                ost_music.play()
+                if not is_muted:
+                    ost_music.play()
                 game_over_fx.stop()
                 world_data = []
                 world = reset_map(map)
