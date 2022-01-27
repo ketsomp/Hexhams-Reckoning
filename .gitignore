@@ -1,0 +1,4 @@
+.DS_Store
+/assets/.DS_Store
+__pycache__/
+/assets/levels/__pycache__/
