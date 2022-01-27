@@ -25,6 +25,7 @@ Paths['CoinSFX'] = 'coin.wav'
 Paths['Background'] = 'bg.png'
 Paths['Grass'] = 'grass.png'
 Paths['Tree'] = 'tree.png'
+Paths['MuteButton']='mute_btn.png'
 
 for k, v in Paths.items():
     if k != 'Prefix':
