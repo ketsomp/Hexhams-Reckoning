@@ -460,7 +460,8 @@ while running:
             # check if coin collected
             if pygame.sprite.spritecollide(player, coin_group, True):
                 score += 1
-                coin_fx.play()
+                if not is_muted:
+                    coin_fx.play()
             draw_text('X '+str(score), font_score, white, tile_size-10, 10)
 
         enemy1_group.draw(screen)
