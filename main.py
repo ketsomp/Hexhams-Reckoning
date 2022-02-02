@@ -1,11 +1,13 @@
 from threading import Timer
-from time import sleep
+import time
+from urllib.parse import quote_plus
 from paths import Paths
 import pickle
 from os import path
 import math
 import pygame
 from pygame import mixer
+import random
 
 pygame.init()
 mixer.init()
@@ -31,12 +33,18 @@ score = 0
 lives=3
 projectiles=3
 shoot_delay = 0.1
+t=120
 
 enemy_speed = 1
+
+quotes_file=open(Paths['Quotes'],'r')
+quotes=quotes_file.read()
+print(quotes[1])
 
 # colors
 white = (255, 255, 255)
 blue = (0, 0, 255)
+black=(0,0,0)
 
 # True - facing right
 # False - facing left
@@ -61,14 +69,15 @@ bg = pygame.transform.scale((backgroundimg), (screen_width, screen_height))
 
 # load images
 restart_img = pygame.image.load(Paths['RestartButton'])
-start_img = pygame.image.load(Paths['StartButton'])
-exit_img = pygame.image.load(Paths['ExitButton'])
+start_img = pygame.transform.scale(pygame.image.load(Paths['StartButton']),(260,100))
+exit_img = pygame.transform.scale(pygame.image.load(Paths['ExitButton']),(260,100))
 projectile_img = pygame.image.load(Paths['Projectile'])
 coin_img = pygame.image.load(Paths['Coin'])
 mute_img = pygame.image.load(Paths['MuteButton'])
 mute_img = pygame.transform.scale(mute_img, (100, 100))
 fireball_img = pygame.image.load(Paths['Fireball'])
 fireball_img = pygame.transform.scale(fireball_img, (20, 20))
+controls_img=pygame.transform.scale(pygame.image.load(Paths['Controls']),(400,300))
 # load sounds
 ost_music = pygame.mixer.Sound(Paths['Music1'])
 ost_music.set_volume(0.1)
@@ -108,7 +117,6 @@ def isClose(x1, y1, x2, y2):
         return False
 
 # reset map
-
 
 def reset_map(map):
     player.reset(100, screen_height-130)  # coords of player spawn
@@ -166,17 +174,17 @@ class Player():
         if game_over == 0:
             # get keystrokes
             key = pygame.key.get_pressed()
-            if key[pygame.K_LEFT]:
+            if key[pygame.K_LEFT] or key[pygame.K_a]:
                 dx -= 5
                 self.count += 1
                 self.direction = -1
-            if key[pygame.K_RIGHT]:
+            if key[pygame.K_RIGHT] or key[pygame.K_d]:
                 dx += 5
                 self.count += 1
                 self.direction = 1
-            if key[pygame.K_UP]:
+            if key[pygame.K_UP] or key[pygame.K_w]:
                 dy -= 5
-            if key[pygame.K_DOWN]:
+            if key[pygame.K_DOWN] or key[pygame.K_s]:
                 dy += 5
             if key[pygame.K_SPACE]:
                 if self.shoot_wait == 0 and projectiles>0:
@@ -465,7 +473,7 @@ world = World(world_data)
 
 # buttons
 restart_button = Button(screen_width//2-50, screen_height//2+100, restart_img)
-start_button = Button(screen_width//2-350, screen_height//2, start_img)
+start_button = Button(screen_width//2-390, screen_height//2, start_img)
 exit_button = Button(screen_width//2+150, screen_height//2, exit_img)
 exit_button_2=Button(screen_width//2-150,screen_height//2+100,exit_img)
 mute_button = Button(screen_width-100, screen_height-100, mute_img)
@@ -485,9 +493,10 @@ while running:
             ost_music.play(-1)
 
     if main_menu:
-        draw_text("Hexham's Reckoning", font_title, white, 50, 200)
-        draw_text('Objective: Collect 90 coins', font_score, white, 275, 600)
-        draw_text('Avoid enemies', font_score, white, 275, 650)
+        draw_text("Hexham's Reckoning", font_title, black, 50, 200)
+        draw_text('Objective: Collect 90 coins', font_score, black, 275, 300)
+        draw_text('Avoid enemies', font_score, black, 275, 350)
+        screen.blit(controls_img,(190,450))
         if exit_button.draw():
             running = False
         if start_button.draw():
@@ -557,6 +566,7 @@ while running:
 
                 if exit_button_2.draw():
                     running=False
+    quote=random.choice(quotes)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
