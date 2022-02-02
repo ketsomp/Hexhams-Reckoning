@@ -27,7 +27,7 @@ Paths['Background'] = 'bg.png'
 Paths['Grass'] = 'grass.png'
 Paths['Tree'] = 'tree.png'
 Paths['MuteButton']='mute_btn.png'
-
+Paths['Fireball'] = 'fireball.png'
 for k, v in Paths.items():
     if k != 'Prefix':
         Paths[k] = path.join(Paths['Prefix'], v)

@@ -1,3 +1,4 @@
+from time import sleep
 from paths import Paths
 import pickle
 from os import path
@@ -18,6 +19,8 @@ font = pygame.font.Font('freesansbold.ttf', 16)
 
 textX = 10
 textY = 10
+# Wait before shooting again (secs)
+shoot_delay = 0.3
 
 # define game variables
 tile_size = 40
@@ -63,7 +66,8 @@ projectile_img = pygame.image.load(Paths['Projectile'])
 coin_img = pygame.image.load(Paths['Coin'])
 mute_img = pygame.image.load(Paths['MuteButton'])
 mute_img = pygame.transform.scale(mute_img, (100, 100))
-
+fireball_img = pygame.image.load(Paths['Fireball'])
+fireball_img = pygame.transform.scale(fireball_img, (20, 20))
 # load sounds
 ost_music = pygame.mixer.Sound(Paths['Music1'])
 ost_music.set_volume(0.1)
@@ -143,6 +147,7 @@ class Button():
 
 
 class Player():
+    shoot_wait = 0
     def __init__(self, x, y):
         self.reset(x, y)
 
@@ -166,6 +171,11 @@ class Player():
                 dy -= 5
             if key[pygame.K_DOWN]:
                 dy += 5
+            if key[pygame.K_SPACE]:
+                if self.shoot_wait == 0:
+                    self.shoot()
+                    self.shoot_wait = 1
+                    sleep(shoot_delay)
             if key[pygame.K_LEFT] == False and key[pygame.K_RIGHT] == False:
                 self.count = 0
                 self.index = 0
@@ -225,6 +235,14 @@ class Player():
         screen.blit(self.image, self.rect)
         return game_over
 
+    def shoot(self):
+        if self.direction == 1:
+            bullet = Bullet(self.rect.x+self.width, self.rect.y+self.height//2, self.direction)
+            bullet_group.add(bullet)
+        elif self.direction == -1:
+            bullet = Bullet(self.rect.x, self.rect.y+self.height//2, self.direction)
+            bullet_group.add(bullet)
+
     def reset(self, x, y):
         self.images_right = []
         self.images_left = []
@@ -246,7 +264,7 @@ class Player():
         self.rect.y = y
         self.width = self.image.get_width()
         self.height = self.image.get_height()
-        self.direction = 0
+        self.direction = 1
 
 
 class World():
@@ -303,6 +321,27 @@ class World():
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
           #  pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = fireball_img
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = direction
+        self.speed = 5
+
+    def update(self):
+        if self.direction == 1:
+            self.rect.x += self.speed
+        elif self.direction == -1:
+            self.rect.x -= self.speed
+        if self.rect.x > screen_width or self.rect.x < 0:
+            self.kill()
+        if pygame.sprite.spritecollide(self, enemy1_group, True):
+            self.kill()
+        
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, path):
@@ -379,6 +418,7 @@ enemy1_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 coin_group = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
 
 # coin icon for score
 score_coin = Coin(tile_size//2, tile_size//2)
@@ -424,6 +464,7 @@ while running:
         world.draw()
 
         if game_over == 0:
+            bullet_group.update()
             enemy1_group.update()
             draw_text(f'Map: {map}', font_score, white, screen_width-75, 10)
             draw_text(f'Lives: {lives}',font_score,white,10,40)
@@ -440,7 +481,7 @@ while running:
         lava_group.draw(screen)
         exit_group.draw(screen)
         coin_group.draw(screen)
-
+        bullet_group.draw(screen)
         game_over = player.update(game_over)
 
         # if player dies
