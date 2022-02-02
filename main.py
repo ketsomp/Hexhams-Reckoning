@@ -543,6 +543,7 @@ while running:
 
         # if player exits
         if game_over == 1:
+            dead_enemies = []
             map += 1
             if map <= max_maps:
                 # reset level for next map
