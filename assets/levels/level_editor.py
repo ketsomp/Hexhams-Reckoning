@@ -56,7 +56,7 @@ seven_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'seven.png')
 eight_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'eight.webp'))
 nine_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'nine.webp'))
 
-tile_limit = 17
+tile_limit = 8
 #define game variables
 clicked = False
 level = 1
@@ -129,45 +129,7 @@ def draw_world():
 					#exit
 					img = pygame.transform.scale(exit_img, (tile_size, int(tile_size * 1.5)))
 					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 9:
-					#one exit
-					img = pygame.transform.scale(one_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 10:
-					#two exit
-					img = pygame.transform.scale(two_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 11:
-					#three exit
-					img = pygame.transform.scale(three_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 12:
-					#four exit
-					img = pygame.transform.scale(four_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 13:
-					#five exit
-					img = pygame.transform.scale(five_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 14:
-					#six exit
-					img = pygame.transform.scale(six_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 15:
-					#seven exit
-					img = pygame.transform.scale(seven_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 16:
-					#eight exit
-					img = pygame.transform.scale(eight_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-				if world_data[row][col] == 17:
-					#nine exit
-					img = pygame.transform.scale(nine_img, (tile_size, int(tile_size * 1.5)))
-					screen.blit(img, (col * tile_size, row * tile_size - (tile_size // 2)))
-
-
-
+				
 class Button():
 	def __init__(self, x, y, image):
 		self.image = image

@@ -1,13 +1,12 @@
+from paths import Paths
 import pickle
 from os import path
 import math
-from re import X
 import pygame
 from pygame import mixer
-from pygame.constants import K_RIGHT
 
 pygame.init()
-mixer.init()        
+mixer.init()
 
 # fps
 clock = pygame.time.Clock()
@@ -24,9 +23,12 @@ textY = 10
 tile_size = 40
 game_over = 0
 main_menu = True
-map = 5
+map = 1
 max_maps = 9
 score = 0
+lives=1
+
+enemy_speed = 1
 
 # colors
 white = (255, 255, 255)
@@ -36,9 +38,6 @@ blue = (0, 0, 255)
 # False - facing left
 pov = True
 
-# file paths
-from paths import Paths
-# Replacing
 # screen specifications
 screen_width = 800
 screen_height = 800
@@ -50,8 +49,7 @@ pygame.display.set_icon(icon)
 # fonts
 font = pygame.font.SysFont('Bauhaus 93', 70)
 font_score = pygame.font.SysFont('Bauhaus 93', 30)
-font_title=pygame.font.SysFont('Herculanum',70)
-
+font_title = pygame.font.SysFont('Herculanum', 70)
 
 # background
 backgroundimg = pygame.image.load(Paths['Background'])
@@ -65,8 +63,10 @@ projectile_img = pygame.image.load(Paths['Projectile'])
 coin_img = pygame.image.load(Paths['Coin'])
 mute_img = pygame.image.load(Paths['MuteButton'])
 mute_img = pygame.transform.scale(mute_img, (100, 100))
+
 # load sounds
 ost_music = pygame.mixer.Sound(Paths['Music1'])
+ost_music.set_volume(0.1)
 ost_music.play(-1)
 coin_fx = pygame.mixer.Sound(Paths['CoinSFX'])
 coin_fx.set_volume(0.5)
@@ -90,6 +90,7 @@ def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
 
+
 def isClose(x1, y1, x2, y2):
     distance = math.sqrt((math.pow(x1-x2, 2)) + (math.pow(y1-y2, 2)))
     if distance < 300:
@@ -98,6 +99,7 @@ def isClose(x1, y1, x2, y2):
         return False
 
 # reset map
+
 
 def reset_map(map):
     player.reset(100, screen_height-130)  # coords of player spawn
@@ -159,7 +161,7 @@ class Player():
             if key[pygame.K_RIGHT]:
                 dx += 5
                 self.count += 1
-                self.direction = 1  
+                self.direction = 1
             if key[pygame.K_UP]:
                 dy -= 5
             if key[pygame.K_DOWN]:
@@ -215,14 +217,12 @@ class Player():
         elif game_over == -1:
             self.image = self.dead_image
             draw_text('Game Over!', font, blue,
-                      (screen_width//2)-200, screen_height//2)
+                      (screen_width//2)-150, screen_height//2)
             if self.rect.y > 200:
                 self.rect.y -= 5
 
         # draw player on screen
         screen.blit(self.image, self.rect)
-       # pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
-
         return game_over
 
     def reset(self, x, y):
@@ -233,7 +233,7 @@ class Player():
         for n in range(1, 9):
             # mass load images for walking animation
             img_right = pygame.image.load(path.join(
-                Paths['Prefix'],"mario_walking",f"Rmario{n}.png"))
+                Paths['Prefix'], "mario_walking", f"Rmario{n}.png"))
             img_right = pygame.transform.scale(img_right, (40, 80))
             # flip on x axis for moving left
             img_left = pygame.transform.flip(img_right, True, False)
@@ -255,22 +255,11 @@ class World():
 
         # load images
         dirt_img = pygame.image.load(
-            path.join(Paths['Prefix'],'dirt.png'))
+            path.join(Paths['Prefix'], 'dirt.png'))
         grass_img = pygame.image.load(
-            path.join(Paths['Prefix'],'grass.png'))
+            path.join(Paths['Prefix'], 'grass.png'))
         tree_img = pygame.image.load(
-            path.join(Paths['Prefix'],'tree.png'))
-
-        one_img=pygame.image.load(path.join(Paths['Prefix'],'numbers','one.webp'))
-        two_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','two.webp'))
-        three_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','three.png'))
-        four_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','four.png'))
-        five_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','five.webp'))
-        six_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','six.png'))
-        seven_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','seven.png'))
-        eight_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','eight.webp'))
-        nine_img = pygame.image.load(path.join(Paths['Prefix'],'numbers','nine.webp'))
-
+            path.join(Paths['Prefix'], 'tree.png'))
 
         def draw_tile(image):
             img = pygame.transform.scale(image, (tile_size, tile_size))
@@ -306,25 +295,7 @@ class World():
                 if tile == 8:
                     exit = Exit(col_count*tile_size, row_count*tile_size)
                     exit_group.add(exit)
-                if tile==9:
-                    draw_tile(one_img)
-                if tile==10:
-                    draw_tile(two_img)
-                if tile==11:
-                    draw_tile(three_img)
-                if tile==12:
-                    draw_tile(four_img)
-                if tile==13:
-                    draw_tile(five_img)
-                if tile==14:
-                    draw_tile(six_img)
-                if tile==15:
-                    draw_tile(seven_img)
-                if tile==16:
-                    draw_tile(eight_img)
-                if tile==17:
-                    draw_tile(nine_img)
-                
+
                 col_count += 1
             row_count += 1
 
@@ -332,9 +303,6 @@ class World():
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
           #  pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
-
-enemy_speed=1
-
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, path):
@@ -346,36 +314,37 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
         self.move_direction = 1
         self.move_counter = 0
-        self.edx=self.edy=0
+        self.edx = self.edy = 0
 
     def update(self):
         # enemies movement
-        self.rect.x+=self.edx
-        self.rect.y+=self.edy
-        if isClose(player.rect.x,player.rect.y,self.rect.x,self.rect.y):
-            #target player if player gets too close
-            if self.rect.x<player.rect.x:
-                self.edx=enemy_speed
+        self.rect.x += self.edx
+        self.rect.y += self.edy
+        if isClose(player.rect.x, player.rect.y, self.rect.x, self.rect.y):
+            # target player if player gets too close
+            if self.rect.x < player.rect.x:
+                self.edx = enemy_speed
             else:
-                self.edx=-enemy_speed
-            if self.rect.y<player.rect.y:
-                self.edy=enemy_speed
+                self.edx = -enemy_speed
+            if self.rect.y < player.rect.y:
+                self.edy = enemy_speed
             else:
-                self.edy=-enemy_speed
+                self.edy = -enemy_speed
         else:
-            #continue to passively move
-            self.edx=self.edy=0
+            # continue to passively move
+            self.edx = self.edy = 0
             self.rect.x += self.move_direction
             self.move_counter += 1
             if self.move_counter > 50:
                 self.move_direction *= -1
                 self.move_counter *= -1
-        #keep enemies from crossing out of bounds
-        if self.rect.x>=screen_width-50:
-            self.edx=-self.edx
-        if self.rect.y>=screen_width-50:
-            self.edy=-self.edy
-        
+        # keep enemies from crossing out of bounds
+        if self.rect.x >= screen_width-50:
+            self.edx = -self.edx
+        if self.rect.y >= screen_width-50:
+            self.edy = -self.edy
+
+
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -416,7 +385,7 @@ score_coin = Coin(tile_size//2, tile_size//2)
 coin_group.add(score_coin)
 
 # load in level data and create world
-p = path.join(Paths["Prefix"],'levels',f'level{map}_data')
+p = path.join(Paths["Prefix"], 'levels', f'level{map}_data')
 if path.exists(p):
     pickle_in = open(p, 'rb')
     world_data = pickle.load(pickle_in)
@@ -426,6 +395,7 @@ world = World(world_data)
 restart_button = Button(screen_width//2-50, screen_height//2+100, restart_img)
 start_button = Button(screen_width//2-350, screen_height//2, start_img)
 exit_button = Button(screen_width//2+150, screen_height//2, exit_img)
+exit_button_2=Button(screen_width//2-150,screen_height//2+100,exit_img)
 mute_button = Button(screen_width-100, screen_height-100, mute_img)
 is_muted = False
 # game loop
@@ -435,16 +405,17 @@ while running:
     screen.blit(bg, (0, 0))
     if mute_button.draw():
         is_muted = not is_muted
-        mute_button.image = pygame.transform.flip(mute_button.image, True, False)
+        mute_button.image = pygame.transform.flip(
+            mute_button.image, True, False)
         if is_muted:
             ost_music.stop()
         else:
             ost_music.play(-1)
-    
+
     if main_menu:
-        draw_text("Hexham's Reckoning",font_title,white,50,200)
-        draw_text('Objective: Collect 90 coins',font_score,white,275,600)
-        draw_text('Avoid enemies',font_score,white,275,650)
+        draw_text("Hexham's Reckoning", font_title, white, 50, 200)
+        draw_text('Objective: Collect 90 coins', font_score, white, 275, 600)
+        draw_text('Avoid enemies', font_score, white, 275, 650)
         if exit_button.draw():
             running = False
         if start_button.draw():
@@ -455,6 +426,7 @@ while running:
         if game_over == 0:
             enemy1_group.update()
             draw_text(f'Map: {map}', font_score, white, screen_width-75, 10)
+            draw_text(f'Lives: {lives}',font_score,white,10,40)
 
             # update score
             # check if coin collected
@@ -473,14 +445,20 @@ while running:
 
         # if player dies
         if game_over == -1:
-            if restart_button.draw():  # if restart button clicked
-                if not is_muted:
-                    ost_music.play()
-                game_over_fx.stop()
-                world_data = []
-                world = reset_map(map)
-                game_over = 0
-                score = 0
+            if lives>1:
+                if restart_button.draw():  # if restart button clicked
+                    lives-=1
+                    if not is_muted:
+                        ost_music.play()
+                    game_over_fx.stop()
+                    world_data = []
+                    world = reset_map(map)
+                    game_over = 0
+                    score = 0
+            else:
+                if exit_button_2.draw():
+                    running=False
+
         # if player exits
         if game_over == 1:
             map += 1
@@ -490,7 +468,7 @@ while running:
                 world = reset_map(map)
                 game_over = 0
             else:
-                #end game
+                # end game
                 draw_text('You Win!', font, blue,
                           (screen_width//2)-140, screen_height//2)
                 ost_music.stop()
