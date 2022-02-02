@@ -20,7 +20,7 @@ font = pygame.font.Font('freesansbold.ttf', 16)
 textX = 10
 textY = 10
 # Wait before shooting again (secs)
-shoot_delay = 0.3
+shoot_delay = 0.1
 
 # define game variables
 tile_size = 40
@@ -29,7 +29,8 @@ main_menu = True
 map = 1
 max_maps = 9
 score = 0
-lives=1
+lives=3
+projectiles=3
 
 enemy_speed = 1
 
@@ -78,6 +79,9 @@ game_over_fx = pygame.mixer.Sound(Paths['GameOverSoundEffect'])
 game_over_fx.set_volume(0.5)
 game_complete_fx = pygame.mixer.Sound(Paths['GameCompleteSoundEffect'])
 game_complete_fx.set_volume(0.5)
+shoot_fx = pygame.mixer.Sound(Paths['ProjectileSoundEffect'])
+shoot_fx.set_volume(0.5)
+
 
 row_count = col_count = 0
 
@@ -172,10 +176,12 @@ class Player():
             if key[pygame.K_DOWN]:
                 dy += 5
             if key[pygame.K_SPACE]:
-                if self.shoot_wait == 0:
+                if self.shoot_wait == 0 and projectiles>0:
                     self.shoot()
+                    shoot_fx.play()
                     self.shoot_wait = 1
                     sleep(shoot_delay)
+                    self.shoot_wait=0
             if key[pygame.K_LEFT] == False and key[pygame.K_RIGHT] == False:
                 self.count = 0
                 self.index = 0
@@ -236,12 +242,15 @@ class Player():
         return game_over
 
     def shoot(self):
+        global projectiles
         if self.direction == 1:
             bullet = Bullet(self.rect.x+self.width, self.rect.y+self.height//2, self.direction)
             bullet_group.add(bullet)
+            projectiles-=1
         elif self.direction == -1:
             bullet = Bullet(self.rect.x, self.rect.y+self.height//2, self.direction)
             bullet_group.add(bullet)
+            projectiles-=1
 
     def reset(self, x, y):
         self.images_right = []
@@ -302,7 +311,9 @@ class World():
                 if tile == 4:
                     draw_tile(tree_img)
                 if tile == 5:
-                    draw_tile(projectile_img)
+                    item = Item(col_count*tile_size+(tile_size//2),
+                                row_count*tile_size+(tile_size//2))
+                    item_group.add(item)
                 if tile == 6:
                     lava = Lava(col_count*tile_size, row_count*tile_size)
                     lava_group.add(lava)
@@ -410,6 +421,14 @@ class Coin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
+class Item(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load(Paths['Projectile'])
+        self.image = pygame.transform.scale(img, (tile_size//2, tile_size//2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
 
 # instances
 player = Player(100, screen_height-120)
@@ -418,11 +437,16 @@ enemy1_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 coin_group = pygame.sprite.Group()
+item_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 
 # coin icon for score
 score_coin = Coin(tile_size//2, tile_size//2)
 coin_group.add(score_coin)
+
+# fireball icon for score
+item_counter = Item(tile_size//2-5, tile_size//2+25)
+coin_group.add(item_counter)
 
 # load in level data and create world
 p = path.join(Paths["Prefix"], 'levels', f'level{map}_data')
@@ -467,7 +491,7 @@ while running:
             bullet_group.update()
             enemy1_group.update()
             draw_text(f'Map: {map}', font_score, white, screen_width-75, 10)
-            draw_text(f'Lives: {lives}',font_score,white,10,40)
+            draw_text(f'Lives: {lives}',font_score,white,10,60)
 
             # update score
             # check if coin collected
@@ -477,11 +501,19 @@ while running:
                     coin_fx.play()
             draw_text('X '+str(score), font_score, white, tile_size-10, 10)
 
+            if pygame.sprite.spritecollide(player, item_group, True):
+                projectiles += 1
+                if not is_muted:
+                    coin_fx.play()
+            draw_text('X '+str(projectiles), font_score, white, tile_size-10, 40)
+
         enemy1_group.draw(screen)
         lava_group.draw(screen)
         exit_group.draw(screen)
         coin_group.draw(screen)
         bullet_group.draw(screen)
+        item_group.draw(screen)
+
         game_over = player.update(game_over)
 
         # if player dies
