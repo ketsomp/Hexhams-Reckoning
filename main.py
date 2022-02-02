@@ -1,3 +1,4 @@
+from threading import Timer
 from time import sleep
 from paths import Paths
 import pickle
@@ -114,6 +115,7 @@ def reset_map(map):
     enemy1_group.empty()
     lava_group.empty()
     exit_group.empty()
+    bullet_group.empty()
     # load level data and create new world
     p = path.join(Paths["Prefix"], 'levels', f'level{map}_data')
     if path.exists(p):
@@ -154,7 +156,8 @@ class Player():
     shoot_wait = 0
     def __init__(self, x, y):
         self.reset(x, y)
-
+    def __enddelay__(self):
+        self.shoot_wait = 0
     def update(self, game_over):
         #change in x and y
         dx = 0
@@ -180,8 +183,7 @@ class Player():
                     self.shoot()
                     shoot_fx.play()
                     self.shoot_wait = 1
-                    sleep(shoot_delay)
-                    self.shoot_wait=0
+                    Timer(shoot_delay, self.__enddelay__).start()
             if key[pygame.K_LEFT] == False and key[pygame.K_RIGHT] == False:
                 self.count = 0
                 self.index = 0
