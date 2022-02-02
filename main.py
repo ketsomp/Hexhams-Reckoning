@@ -536,7 +536,6 @@ while running:
                     world_data = []
                     world = reset_map(map)
                     game_over = 0
-                    score = 0
             else:
                 if exit_button_2.draw():
                     running=False
@@ -563,6 +562,7 @@ while running:
                     world = reset_map(map)
                     game_over = 0
                     score = 0
+                    ost_music.play()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
