@@ -26,7 +26,7 @@ tile_size = 40
 game_over = 0
 main_menu = True
 map = 1
-max_maps = 9
+max_maps = 10
 score = 0
 lives=3
 projectiles=3
@@ -555,13 +555,8 @@ while running:
                 ost_music.stop()
                 game_complete_fx.play()
 
-                if restart_button.draw():
-                    map = 1
-                    world_data = []
-                    world = reset_map(map)
-                    game_over = 0
-                    score = 0
-                    ost_music.play()
+                if exit_button_2.draw():
+                    running=False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
