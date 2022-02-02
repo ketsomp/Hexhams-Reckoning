@@ -83,6 +83,7 @@ game_complete_fx.set_volume(0.5)
 shoot_fx = pygame.mixer.Sound(Paths['ProjectileSoundEffect'])
 shoot_fx.set_volume(0.5)
 
+dead_enemies = []
 
 row_count = col_count = 0
 
@@ -299,6 +300,7 @@ class World():
             self.tile_list.append(tile)
 
         row_count = 0
+        enemy_count = 0
         for row in data:
             col_count = 0
             for tile in row:
@@ -307,9 +309,11 @@ class World():
                 if tile == 2:
                     draw_tile(grass_img)
                 if tile == 3:
-                    enemy1 = Enemy(col_count*tile_size,
-                                   row_count*tile_size, Paths['Enemy1Image'])
-                    enemy1_group.add(enemy1)
+                    enemy_count += 1
+                    if not enemy_count in dead_enemies:
+                        enemy1 = Enemy(col_count*tile_size,
+                                   row_count*tile_size, Paths['Enemy1Image'],enemy_count)
+                        enemy1_group.add(enemy1)
                 if tile == 4:
                     draw_tile(tree_img)
                 if tile == 5:
@@ -352,12 +356,14 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if self.rect.x > screen_width or self.rect.x < 0:
             self.kill()
-        if pygame.sprite.spritecollide(self, enemy1_group, True):
+        killed = pygame.sprite.spritecollide(self, enemy1_group, True)
+        if killed:
             self.kill()
+            dead_enemies.append(killed[0].id)
         
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, path):
+    def __init__(self, x, y, path, id):
         pygame.sprite.Sprite.__init__(self)
         img = pygame.image.load(path)
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
@@ -367,6 +373,7 @@ class Enemy(pygame.sprite.Sprite):
         self.move_direction = 1
         self.move_counter = 0
         self.edx = self.edy = 0
+        self.id = id
 
     def update(self):
         # enemies movement
