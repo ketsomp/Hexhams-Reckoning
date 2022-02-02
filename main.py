@@ -20,8 +20,6 @@ font = pygame.font.Font('freesansbold.ttf', 16)
 
 textX = 10
 textY = 10
-# Wait before shooting again (secs)
-shoot_delay = 0.1
 
 # define game variables
 tile_size = 40
@@ -32,6 +30,7 @@ max_maps = 9
 score = 0
 lives=3
 projectiles=3
+shoot_delay = 0.1
 
 enemy_speed = 1
 
