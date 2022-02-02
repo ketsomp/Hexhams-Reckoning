@@ -37,9 +37,6 @@ t=120
 
 enemy_speed = 1
 
-quotes_file=open(Paths['Quotes'],'r')
-quotes=quotes_file.read()
-print(quotes[1])
 
 # colors
 white = (255, 255, 255)
@@ -566,7 +563,6 @@ while running:
 
                 if exit_button_2.draw():
                     running=False
-    quote=random.choice(quotes)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
