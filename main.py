@@ -1,13 +1,10 @@
 from threading import Timer
-import time
-from urllib.parse import quote_plus
 from paths import Paths
 import pickle
 from os import path
 import math
 import pygame
 from pygame import mixer
-import random
 
 pygame.init()
 mixer.init()
@@ -33,13 +30,8 @@ score = 0
 lives=3
 projectiles=3
 shoot_delay = 0.1
-t=120
 
 enemy_speed = 1
-
-quotes_file=open(Paths['Quotes'],'r')
-quotes=quotes_file.read()
-print(quotes[1])
 
 # colors
 white = (255, 255, 255)
@@ -61,7 +53,7 @@ pygame.display.set_icon(icon)
 # fonts
 font = pygame.font.SysFont('Bauhaus 93', 70)
 font_score = pygame.font.SysFont('Bauhaus 93', 30)
-font_title = pygame.font.SysFont('Herculanum', 70)
+font_title = pygame.font.Font(Paths['Herculanum'], 70)
 
 # background
 backgroundimg = pygame.image.load(Paths['Background'])
@@ -217,6 +209,7 @@ class Player():
                 # check for collision on y axis
                 if tile[1].colliderect(self.rect.x, self.rect.y+dy, self.width, self.height):
                     dy = 0
+                    
                 if tile[1].colliderect(self.rect.x+dx, self.rect.y, self.width, self.height):
                     dx = 0
             # check for collision with enemies
@@ -267,11 +260,11 @@ class Player():
         self.images_left = []
         self.index = 0
         self.count = 0
-        for n in range(1, 9):
+        for n in range(1, 5):
             # mass load images for walking animation
             img_right = pygame.image.load(path.join(
-                Paths['Prefix'], "mario_walking", f"Rmario{n}.png"))
-            img_right = pygame.transform.scale(img_right, (40, 80))
+                Paths['Prefix'], "mage sprite", f"mage sprite {n}.png"))
+            img_right = pygame.transform.scale(img_right, (80, 80))
             # flip on x axis for moving left
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
@@ -401,6 +394,12 @@ class Enemy(pygame.sprite.Sprite):
             self.edx = self.edy = 0
             self.rect.x += self.move_direction
             self.move_counter += 1
+            # check for object collision while passively moving
+            for tile in world.tile_list:
+                if tile[1].colliderect(self.rect.x, self.rect.y+self.edy, self.rect.width, self.rect.height):
+                    self.edy = 0
+                if tile[1].colliderect(self.rect.x+self.edx, self.rect.y, self.rect.width, self.rect.height):
+                    self.edx = 0
             if self.move_counter > 50:
                 self.move_direction *= -1
                 self.move_counter *= -1
@@ -409,6 +408,13 @@ class Enemy(pygame.sprite.Sprite):
             self.edx = -self.edx
         if self.rect.y >= screen_width-50:
             self.edy = -self.edy
+        
+        #check for object collision while attacking
+        for tile in world.tile_list:
+            if tile[1].colliderect(self.rect.x, self.rect.y+self.edy, self.rect.width, self.rect.height):
+                self.edy = 0
+            if tile[1].colliderect(self.rect.x+self.edx, self.rect.y, self.rect.width, self.rect.height):
+                self.edx = 0
 
 
 class Lava(pygame.sprite.Sprite):
@@ -423,7 +429,7 @@ class Lava(pygame.sprite.Sprite):
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(Paths['Exit'])
+        self.image = pygame.transform.scale(pygame.image.load(Paths['Exit']),(tile_size,tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -494,7 +500,7 @@ while running:
 
     if main_menu:
         draw_text("Hexham's Reckoning", font_title, black, 50, 200)
-        draw_text('Objective: Collect 90 coins', font_score, black, 275, 300)
+        draw_text('Objective: Collect 50 coins', font_score, black, 275, 300)
         draw_text('Avoid enemies', font_score, black, 275, 350)
         screen.blit(controls_img,(190,450))
         if exit_button.draw():
@@ -533,6 +539,11 @@ while running:
 
         game_over = player.update(game_over)
 
+        #if player collects 10 coins, reset score and add a life
+        if score>=10:
+            lives+=1
+            score=0
+
         # if player dies
         if game_over == -1:
             if lives>1:
@@ -566,7 +577,6 @@ while running:
 
                 if exit_button_2.draw():
                     running=False
-    quote=random.choice(quotes)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

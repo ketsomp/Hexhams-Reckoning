@@ -2,8 +2,8 @@ from os import path
 # path.join(path.dirname(path.abspath(__file__)), 'assets')
 Paths = {}
 Paths['Prefix'] = path.join(path.dirname(path.abspath(__file__)), 'assets')
-Paths['Icon'] = 'mario.png'
-Paths['SpriteRImage'] = path.join('mario_walking','mario6.png')
+Paths['Icon'] = 'icon.png'
+Paths['SpriteRImage'] = path.join('mage sprite','mage sprite 1.png')
 Paths['SpriteLImage'] = 'firemario_L.png'
 Paths['Enemy1Image'] = 'goomba.png'
 Paths['Music1'] = 'medieval_ost.mp3'
@@ -20,7 +20,7 @@ Paths['SaveButton'] = 'save_btn.png'
 Paths['LoadButton'] = 'load_btn.png'
 Paths['MuteButton'] = 'mute_btn.png'
 Paths['ExitButton'] = 'exit_btn.png'
-Paths['Exit'] = 'black_exit.png'
+Paths['Exit'] = 'door.png'
 Paths['Coin'] = 'coin.png'
 Paths['CoinSFX'] = 'coin.wav'
 Paths['Background'] = 'bg.png'
@@ -30,6 +30,7 @@ Paths['MuteButton']='mute_btn.png'
 Paths['Fireball'] = 'fireball.png'
 Paths['Controls'] = 'controls.png'
 Paths['Quotes'] = 'quotes.py'
+Paths['Herculanum'] = 'Herculanum.ttf'
 for k, v in Paths.items():
     if k != 'Prefix':
         Paths[k] = path.join(Paths['Prefix'], v)
