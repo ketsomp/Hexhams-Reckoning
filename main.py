@@ -22,13 +22,18 @@ textY = 10
 
 # define game variables
 tile_size = 40
+
+# -1 - player dies
+# 0 - player is playing normally
+# 1 - player exits through an exit
 game_over = 0
+
 main_menu = True
 map = 1
 max_maps = 10
 score = 0
-lives=3
-projectiles=3
+lives = 3
+projectiles = 3
 shoot_delay = 0.1
 
 enemy_speed = 1
@@ -36,7 +41,7 @@ enemy_speed = 1
 # colors
 white = (255, 255, 255)
 blue = (0, 0, 255)
-black=(0,0,0)
+black = (0, 0, 0)
 
 # True - facing right
 # False - facing left
@@ -61,15 +66,18 @@ bg = pygame.transform.scale((backgroundimg), (screen_width, screen_height))
 
 # load images
 restart_img = pygame.image.load(Paths['RestartButton'])
-start_img = pygame.transform.scale(pygame.image.load(Paths['StartButton']),(260,100))
-exit_img = pygame.transform.scale(pygame.image.load(Paths['ExitButton']),(260,100))
+start_img = pygame.transform.scale(
+    pygame.image.load(Paths['StartButton']), (260, 100))
+exit_img = pygame.transform.scale(
+    pygame.image.load(Paths['ExitButton']), (260, 100))
 projectile_img = pygame.image.load(Paths['Projectile'])
 coin_img = pygame.image.load(Paths['Coin'])
 mute_img = pygame.image.load(Paths['MuteButton'])
 mute_img = pygame.transform.scale(mute_img, (100, 100))
 fireball_img = pygame.image.load(Paths['Fireball'])
 fireball_img = pygame.transform.scale(fireball_img, (20, 20))
-controls_img=pygame.transform.scale(pygame.image.load(Paths['Controls']),(400,300))
+controls_img = pygame.transform.scale(
+    pygame.image.load(Paths['Controls']), (400, 300))
 # load sounds
 ost_music = pygame.mixer.Sound(Paths['Music1'])
 ost_music.set_volume(0.1)
@@ -97,6 +105,7 @@ def draw_grid():
 
 
 def draw_text(text, font, text_col, x, y):
+    # use to draw text
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
 
@@ -109,6 +118,7 @@ def isClose(x1, y1, x2, y2):
         return False
 
 # reset map
+
 
 def reset_map(map):
     player.reset(100, screen_height-130)  # coords of player spawn
@@ -154,10 +164,13 @@ class Button():
 
 class Player():
     shoot_wait = 0
+
     def __init__(self, x, y):
         self.reset(x, y)
+
     def __enddelay__(self):
         self.shoot_wait = 0
+
     def update(self, game_over):
         #change in x and y
         dx = 0
@@ -179,7 +192,7 @@ class Player():
             if key[pygame.K_DOWN] or key[pygame.K_s]:
                 dy += 5
             if key[pygame.K_SPACE]:
-                if self.shoot_wait == 0 and projectiles>0:
+                if self.shoot_wait == 0 and projectiles > 0:
                     self.shoot()
                     shoot_fx.play()
                     self.shoot_wait = 1
@@ -209,7 +222,7 @@ class Player():
                 # check for collision on y axis
                 if tile[1].colliderect(self.rect.x, self.rect.y+dy, self.width, self.height):
                     dy = 0
-                    
+
                 if tile[1].colliderect(self.rect.x+dx, self.rect.y, self.width, self.height):
                     dx = 0
             # check for collision with enemies
@@ -233,6 +246,7 @@ class Player():
             self.rect.x += dx
             self.rect.y += dy
 
+        # animation of player dies
         elif game_over == -1:
             self.image = self.dead_image
             draw_text('Game Over!', font, blue,
@@ -247,13 +261,15 @@ class Player():
     def shoot(self):
         global projectiles
         if self.direction == 1:
-            bullet = Bullet(self.rect.x+self.width, self.rect.y+self.height//2, self.direction)
+            bullet = Bullet(self.rect.x+self.width,
+                            self.rect.y+self.height//2, self.direction)
             bullet_group.add(bullet)
-            projectiles-=1
+            projectiles -= 1
         elif self.direction == -1:
-            bullet = Bullet(self.rect.x, self.rect.y+self.height//2, self.direction)
+            bullet = Bullet(self.rect.x, self.rect.y +
+                            self.height//2, self.direction)
             bullet_group.add(bullet)
-            projectiles-=1
+            projectiles -= 1
 
     def reset(self, x, y):
         self.images_right = []
@@ -303,6 +319,7 @@ class World():
         enemy_count = 0
         for row in data:
             col_count = 0
+            # define tile ids (set in level editor)
             for tile in row:
                 if tile == 1:
                     draw_tile(dirt_img)
@@ -312,7 +329,7 @@ class World():
                     enemy_count += 1
                     if not enemy_count in dead_enemies:
                         enemy1 = Enemy(col_count*tile_size,
-                                   row_count*tile_size, Paths['Enemy1Image'],enemy_count)
+                                       row_count*tile_size, Paths['Enemy1Image'], enemy_count)
                         enemy1_group.add(enemy1)
                 if tile == 4:
                     draw_tile(tree_img)
@@ -339,6 +356,7 @@ class World():
             screen.blit(tile[0], tile[1])
           #  pygame.draw.rect(screen, (255, 255, 255), tile[1], 2)
 
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
@@ -360,7 +378,7 @@ class Bullet(pygame.sprite.Sprite):
         if killed:
             self.kill()
             dead_enemies.append(killed[0].id)
-        
+
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, path, id):
@@ -408,8 +426,8 @@ class Enemy(pygame.sprite.Sprite):
             self.edx = -self.edx
         if self.rect.y >= screen_width-50:
             self.edy = -self.edy
-        
-        #check for object collision while attacking
+
+        # check for object collision while attacking
         for tile in world.tile_list:
             if tile[1].colliderect(self.rect.x, self.rect.y+self.edy, self.rect.width, self.rect.height):
                 self.edy = 0
@@ -429,7 +447,8 @@ class Lava(pygame.sprite.Sprite):
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load(Paths['Exit']),(tile_size,tile_size))
+        self.image = pygame.transform.scale(
+            pygame.image.load(Paths['Exit']), (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -442,6 +461,7 @@ class Coin(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (tile_size//2, tile_size//2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -481,7 +501,7 @@ world = World(world_data)
 restart_button = Button(screen_width//2-50, screen_height//2+100, restart_img)
 start_button = Button(screen_width//2-390, screen_height//2, start_img)
 exit_button = Button(screen_width//2+150, screen_height//2, exit_img)
-exit_button_2=Button(screen_width//2-150,screen_height//2+100,exit_img)
+exit_button_2 = Button(screen_width//2-150, screen_height//2+100, exit_img)
 mute_button = Button(screen_width-100, screen_height-100, mute_img)
 is_muted = False
 # game loop
@@ -498,11 +518,13 @@ while running:
         else:
             ost_music.play(-1)
 
+    # main menu of game
     if main_menu:
         draw_text("Hexham's Reckoning", font_title, black, 50, 200)
-        draw_text('Objective: Collect 50 coins', font_score, black, 275, 300)
+        draw_text('Objective: Clear all 10 levels',
+                  font_score, black, 275, 300)
         draw_text('Avoid enemies', font_score, black, 275, 350)
-        screen.blit(controls_img,(190,450))
+        screen.blit(controls_img, (190, 450))
         if exit_button.draw():
             running = False
         if start_button.draw():
@@ -510,11 +532,12 @@ while running:
     else:
         world.draw()
 
+        # if player is playing normally
         if game_over == 0:
             bullet_group.update()
             enemy1_group.update()
             draw_text(f'Map: {map}', font_score, white, screen_width-75, 10)
-            draw_text(f'Lives: {lives}',font_score,white,10,60)
+            draw_text(f'Lives: {lives}', font_score, white, 10, 60)
 
             # update score
             # check if coin collected
@@ -528,7 +551,8 @@ while running:
                 projectiles += 1
                 if not is_muted:
                     coin_fx.play()
-            draw_text('X '+str(projectiles), font_score, white, tile_size-10, 40)
+            draw_text('X '+str(projectiles), font_score,
+                      white, tile_size-10, 40)
 
         enemy1_group.draw(screen)
         lava_group.draw(screen)
@@ -539,16 +563,16 @@ while running:
 
         game_over = player.update(game_over)
 
-        #if player collects 10 coins, reset score and add a life
-        if score>=10:
-            lives+=1
-            score=0
+        # if player collects 10 coins, reset score and add a life
+        if score >= 10:
+            lives += 1
+            score = 0
 
         # if player dies
         if game_over == -1:
-            if lives>1:
+            if lives > 1:
                 if restart_button.draw():  # if restart button clicked
-                    lives-=1
+                    lives -= 1
                     if not is_muted:
                         ost_music.play()
                     game_over_fx.stop()
@@ -557,7 +581,7 @@ while running:
                     game_over = 0
             else:
                 if exit_button_2.draw():
-                    running=False
+                    running = False
 
         # if player exits
         if game_over == 1:
@@ -576,7 +600,7 @@ while running:
                 game_complete_fx.play()
 
                 if exit_button_2.draw():
-                    running=False
+                    running = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
