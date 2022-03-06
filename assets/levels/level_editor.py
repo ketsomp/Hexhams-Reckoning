@@ -46,15 +46,6 @@ coin_img = pygame.image.load(Paths['Coin'])
 exit_img = pygame.image.load(Paths['ExitButton'])
 save_img = pygame.image.load(Paths['SaveButton'])
 load_img = pygame.image.load(Paths['LoadButton'])
-one_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'one.webp'))
-two_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'two.webp'))
-three_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'three.png'))
-four_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'four.png'))
-five_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'five.webp'))
-six_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'six.png'))
-seven_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'seven.png'))
-eight_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'eight.webp'))
-nine_img = pygame.image.load(path.join(Paths['Prefix'], 'numbers', 'nine.webp'))
 
 tile_limit = 8
 #define game variables
