@@ -17,8 +17,8 @@ The game also comes with a level editor which is used to edit the various levels
 
 The level editor is stored inside the assets folder, which holds all the game files necessary to the game such as sprite and tile images, soundtracks, fonts etc.
 
-Finally the game also uses a python file named “paths” to facilitate easy usage of the many path names of the game files. This file utilises the module “Paths” to easily fetch path names when called by the main file or level editor.!
+Finally the game also uses a python file named “paths” to facilitate easy usage of the many path names of the game files. This file utilises the module “Paths” to easily fetch path names when called by the main file or level editor.
 
 ![Screen Shot 2023-05-16 at 7 43 34 PM](https://github.com/deas28/Hexhams-Reckoning/assets/66839991/4c67602a-0b3d-40dc-a9d7-502a38226ad7)
 ![Screen Shot 2023-05-16 at 7 43 53 PM](https://github.com/deas28/Hexhams-Reckoning/assets/66839991/9e343061-5e58-429f-abb2-183ff38d3c57)
-!
+
