@@ -11,7 +11,7 @@ The enemies boast a rudimentary AI which automatically starts path tracing towar
 
 There are also various obstacles present such as trees and lava which the player or enemies cannot pass through.
 
-Throughout the duration of the game a soundtrack (not original) plays to set a tone to the game.
+Throughout the duration of the game a soundtrack [(not original)](https://www.youtube.com/watch?v=ADzazbh1WG0) plays to set a tone to the game.
 
 The game also comes with a level editor which is used to edit the various levels of the games. This level editor was mostly made using other sources for reference. It uses the python module pickle to easily change the data of level files. It has an easy-to-use GUI to edit levels with ease.
 
