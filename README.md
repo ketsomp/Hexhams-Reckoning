@@ -24,5 +24,7 @@ Finally the game also uses a python file named “paths” to facilitate easy us
 
 Bibliography:
 [Coding With Russ](https://www.youtube.com/playlist?list=PLjcN1EyupaQnHM1I9SmiXfbT6aG4ezUvu)
+
 https://stackoverflow.com/
+
 https://www.pygame.org/docs/
